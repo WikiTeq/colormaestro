@@ -11,6 +11,9 @@ def generate(palette):
     Returns:
         str: CSS variables definition
     """
+    if not palette:
+        return ":root {\n}\n"
+
     css = ":root {\n"
 
     # Add color variables
