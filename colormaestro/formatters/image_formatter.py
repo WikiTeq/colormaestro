@@ -34,6 +34,12 @@ def _generate_png(palette, output_path):
     if Image is None:
         raise ImportError("Pillow (PIL) library is required for PNG generation. Install with 'pip install pillow'")
 
+    # Avoid ZeroDivisionError computing swatch_width for an empty palette
+    if not palette:
+        img = Image.new('RGBA', (1, 1), color=(0, 0, 0, 0))
+        img.save(output_path)
+        return output_path
+
     # Define image dimensions
     width = 800
     height = 400
@@ -103,6 +109,12 @@ def _generate_svg(palette, output_path):
     Returns:
         str: Path to the generated SVG file
     """
+    # Avoid ZeroDivisionError computing swatch_width for an empty palette
+    if not palette:
+        with open(output_path, 'w') as f:
+            f.write('<svg width="1" height="1" xmlns="http://www.w3.org/2000/svg"></svg>\n')
+        return output_path
+
     # Define dimensions
     width = 800
     height = 400

@@ -13,6 +13,21 @@ def generate(palette):
     Returns:
         str: Tailwind CSS config section for colors
     """
+    if not palette:
+        return (
+            "// tailwind.config.js\n"
+            "module.exports = {\n"
+            "  theme: {\n"
+            "    extend: {\n"
+            "      colors: {\n"
+            "      },\n"
+            "    },\n"
+            "  },\n"
+            "  variants: {},\n"
+            "  plugins: [],\n"
+            "};\n"
+        )
+
     config = "// tailwind.config.js\n"
     config += "module.exports = {\n"
     config += "  theme: {\n"

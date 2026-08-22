@@ -194,12 +194,32 @@ class TestImageFormatter(unittest.TestCase):
             self.assertIn("#3a86ff", content)  # Primary color
             self.assertIn("Primary", content)  # Label
 
+    def test_generate_empty_palette_svg(self):
+        """Test generating SVG with an empty palette"""
+        result = image_formatter.generate([], self.svg_path, "svg")
+
+        # Verify file exists and is valid SVG
+        self.assertTrue(os.path.exists(result))
+        with open(result, 'r') as f:
+            content = f.read()
+            self.assertIn("<svg", content)
+            self.assertIn("</svg>", content)
+
     @unittest.skipIf(image_formatter.Image is None, "PIL not installed")
     def test_generate_png(self):
         """Test generating PNG image (requires PIL)"""
         result = image_formatter.generate(self.palette, self.png_path, "png")
 
         # Verify file exists and is a valid size
+        self.assertTrue(os.path.exists(result))
+        self.assertTrue(os.path.getsize(result) > 0)
+
+    @unittest.skipIf(image_formatter.Image is None, "PIL not installed")
+    def test_generate_empty_palette_png(self):
+        """Test generating PNG with an empty palette"""
+        result = image_formatter.generate([], self.png_path, "png")
+
+        # Verify file exists and is a valid PNG
         self.assertTrue(os.path.exists(result))
         self.assertTrue(os.path.getsize(result) > 0)
 
@@ -231,6 +251,15 @@ class TestTailwindFormatter(unittest.TestCase):
         # Check for shade generation
         self.assertIn("'50':", result)
         self.assertIn("'900':", result)
+
+    def test_generate_empty(self):
+        """Test generating Tailwind config with an empty palette"""
+        result = tailwind.generate([])
+        self.assertIn("// tailwind.config.js", result)
+        self.assertIn("module.exports = {", result)
+        self.assertIn("colors: {", result)
+        self.assertNotIn("primary:", result)
+        self.assertNotIn("DEFAULT:", result)
 
 
 class TestTerminalFormatter(unittest.TestCase):
