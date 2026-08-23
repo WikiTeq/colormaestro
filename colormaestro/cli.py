@@ -50,7 +50,10 @@ def cli(input, palette_type, harmony, num_colors, output_format, html_filename,
             base_color = color_conversion.random_color()
     elif input.startswith('#'):
         click.echo(f"Parsing hex color: {input}")
-        base_color = hex_parser.parse(input)
+        try:
+            base_color = hex_parser.parse(input)
+        except ValueError as e:
+            raise click.UsageError(str(e))
     elif os.path.isfile(input):
         click.echo(f"Extracting colors from image: {input}")
         base_color = image_parser.extract_dominant_color(input)
@@ -70,12 +73,16 @@ def cli(input, palette_type, harmony, num_colors, output_format, html_filename,
         palette = accessible.generate(base_color, num_colors)
 
     # Output formatting
-    output_formats = output_format.split(',')
+    output_formats = [f.strip() for f in output_format.split(',') if f.strip()]
     for fmt in output_formats:
-        fmt = fmt.strip()
+        if fmt not in OUTPUT_FORMATS:
+            raise click.BadParameter(
+                f"Unknown output format '{fmt}'. Valid formats: {', '.join(OUTPUT_FORMATS)}",
+                param_hint="'-o/--output'",
+            )
         if fmt == "terminal":
             terminal.display(palette, show_demo=demo)
-        elif fmt == "html" or html_filename:
+        elif fmt == "html":
             html_path = html_filename or "palette.html"
             html.generate(palette, html_path, show_demo=demo)
             click.echo(f"HTML preview saved to: {html_path}")
@@ -91,10 +98,22 @@ def cli(input, palette_type, harmony, num_colors, output_format, html_filename,
         elif fmt == "json":
             json_output = json_formatter.generate(palette)
             click.echo(json_output)
-        elif fmt in ["png", "svg"] or image_filename:
+        elif fmt in ["png", "svg"]:
             img_path = image_filename or f"palette.{fmt}"
             image_formatter.generate(palette, img_path, fmt)
             click.echo(f"Image saved to: {img_path}")
+
+    # Emit explicit file targets even when no matching -o format was listed,
+    # so '--image out.png' and '--html out.html' work on their own without
+    # hijacking a conflicting requested format
+    if image_filename:
+        img_fmt = 'svg' if image_filename.lower().endswith('.svg') else 'png'
+        if img_fmt not in output_formats:
+            image_formatter.generate(palette, image_filename, img_fmt)
+            click.echo(f"Image saved to: {image_filename}")
+    if html_filename and 'html' not in output_formats:
+        html.generate(palette, html_filename, show_demo=demo)
+        click.echo(f"HTML preview saved to: {html_filename}")
 
     # Additional features
     if check_accessibility:
@@ -102,9 +121,10 @@ def cli(input, palette_type, harmony, num_colors, output_format, html_filename,
         accessibility_utils.display_results(results)
 
     if copy:
-        primary_color = palette[0]
-        # Copy to clipboard - platform specific code would go here
-        click.echo(f"Primary color {primary_color} copied to clipboard")
+        # No clipboard backend is wired up; print the color instead of
+        # falsely claiming it was copied
+        click.echo(f"Warning: clipboard copy is not available - primary color: "
+                   f"{color_conversion.rgb_to_hex(palette[0])}")
 
 if __name__ == '__main__':
     cli()
