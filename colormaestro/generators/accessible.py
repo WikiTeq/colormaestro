@@ -64,10 +64,20 @@ def generate(base_color, num_colors):
         new_v = 0.9 if v < 0.5 else 0.1
         palette.append(color_conversion.hsv_to_rgb((h_comp, s, new_v)))
 
+    # Anchor the palette with an achromatic extreme so dark/light base colors
+    # get the highest-contrast pairing (white/black text) - the hue-bound
+    # search above can never reach these
+    if num_colors > 2:
+        if base_with_black < 2.5:
+            palette.append(white)
+        elif base_with_white < 2.5:
+            palette.append(black)
+
     # Generate remaining colors
     if num_colors > 2:
         # Create a set of hues evenly distributed around the color wheel
-        for i in range(2, num_colors):
+        i = 2
+        while len(palette) < num_colors:
             step = 1.0 / (num_colors - 1)
             new_h = (h + step * i) % 1.0
 
@@ -96,5 +106,6 @@ def generate(base_color, num_colors):
                 # Fallback: create a color with different lightness
                 new_v = 0.8 if i % 2 == 0 else 0.4
                 palette.append(color_conversion.hsv_to_rgb((new_h, 0.8, new_v)))
+            i += 1
 
     return palette
