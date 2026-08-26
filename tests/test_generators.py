@@ -188,7 +188,7 @@ class TestUIGenerator:
     def test_dark_mode(self):
         """Test dark mode UI palette generation"""
         base_color = SAMPLE_COLORS['blue']
-        palette = ui_palette.generate(base_color, 5, dark=True)
+        palette = ui_palette.generate(base_color, 5, dark_mode=True)
 
         # Check that the palette has the correct length
         assert len(palette) == 5

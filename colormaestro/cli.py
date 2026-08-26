@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import click
-from pathlib import Path
 from .parsers import hex_parser, name_parser, image_parser
 from .generators import harmony as harmony_generator, ui_palette, monochromatic, accessible, mood as mood_generator
 from .formatters import terminal, html, css, scss, tailwind, json_formatter, image_formatter
@@ -64,7 +63,7 @@ def cli(input, palette_type, harmony, num_colors, output_format, html_filename,
     # Generate palette
     palette = None
     if palette_type == "ui":
-        palette = ui_palette.generate(base_color, num_colors, dark)
+        palette = ui_palette.generate(base_color, num_colors, dark_mode=dark and not light)
     elif palette_type == "harmony":
         palette = harmony_generator.generate(base_color, harmony, num_colors)
     elif palette_type == "mono":
