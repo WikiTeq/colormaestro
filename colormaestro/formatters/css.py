@@ -32,13 +32,15 @@ def generate(palette):
         # Add RGB components for rgba() usage
         css += f"  {var_name}-rgb: {color[0]}, {color[1]}, {color[2]};\n"
 
-    # Add functional/semantic variables
-    css += "\n  /* Semantic color mapping */\n"
-    css += "  --color-background: var(--color-primary);\n"
-    css += "  --color-text: #000000;\n"
-    css += "  --color-button: var(--color-secondary);\n"
-    css += "  --color-border: rgba(var(--color-primary-rgb), 0.2);\n"
-    css += "  --color-highlight: var(--color-accent);\n"
+    # Add functional/semantic variables only if there are colors to map,
+    # otherwise they would reference undefined variables
+    if palette:
+        css += "\n  /* Semantic color mapping */\n"
+        css += "  --color-background: var(--color-primary);\n"
+        css += "  --color-text: #000000;\n"
+        css += "  --color-button: var(--color-secondary);\n"
+        css += "  --color-border: rgba(var(--color-primary-rgb), 0.2);\n"
+        css += "  --color-highlight: var(--color-accent);\n"
 
     css += "}\n"
 
