@@ -11,7 +11,7 @@ ColorMaestro helps you create beautiful, harmonious, and accessible color palett
 ## Features
 
 - **Multiple Generation Methods**: Create palettes using color harmony rules, monochromatic schemes, accessibility guidelines, mood-based palettes, and UI-optimized color sets
-- **Format Options**: Export your palette to CSS, SCSS, Tailwind config, HTML preview, JSON, or terminal output
+- **Format Options**: Export your palette to CSS, SCSS, Tailwind config, HTML preview, JSON, PNG/SVG images, or terminal output
 - **Accessibility Tools**: Check color contrast ratios against WCAG standards
 - **CLI Interface**: Generate palettes directly from your terminal
 - **Flexible Output**: Use as a library in your Python projects or as a standalone tool
@@ -42,17 +42,25 @@ pip install -e .
 
 ### Command Line Usage
 
-Generate a basic palette from a hex color:
+Generate a harmony palette from a hex color and save an HTML preview:
 
 ```bash
-colormaestro generate --color "#3498db" --method harmony --output palette.html
+colormaestro "#3498db" --harmony triadic --html palette.html
 ```
 
-View a palette in the terminal:
+View a monochromatic palette in the terminal:
 
 ```bash
-colormaestro generate --color "#e74c3c" --method monochromatic --colors 5 --format terminal
+colormaestro "#e74c3c" -t mono -n 5
 ```
+
+If no INPUT is provided, a random palette will be generated:
+
+```bash
+colormaestro
+```
+
+INPUT can be a hex color (`#3A86FF`), a color name (`sky-blue`), or a path to an image file to extract a dominant color from.
 
 ### Python Usage
 
@@ -74,27 +82,28 @@ print(css_code)
 
 ## Color Generation Methods
 
+Palette types are selected with `-t/--type`: `ui` (default), `harmony`, `mono`, or `accessible`.
+
 ### Harmony-Based Palettes
 
 Generate palettes based on color theory harmony rules.
 
 ```bash
-colormaestro generate --color "#9b59b6" --method harmony --harmony-type triadic --colors 6
+colormaestro "#9b59b6" -t harmony --harmony triadic -n 6
 ```
 
-Available harmony types:
+Available harmony types (via `--harmony`):
 - `complementary` - Colors opposite on the color wheel
 - `analogous` - Colors adjacent on the color wheel
 - `triadic` - Three colors evenly spaced around the color wheel
 - `tetradic` - Four colors evenly spaced around the color wheel
-- `split-complementary` - Base color plus two colors adjacent to its complement
 
 ### Monochromatic Palettes
 
 Create variations of a single color with different lightness and saturation.
 
 ```bash
-colormaestro generate --color "#2ecc71" --method monochromatic --colors 5
+colormaestro "#2ecc71" -t mono -n 5
 ```
 
 ### Accessible Palettes
@@ -102,7 +111,7 @@ colormaestro generate --color "#2ecc71" --method monochromatic --colors 5
 Generate color palettes optimized for accessibility and WCAG compliance.
 
 ```bash
-colormaestro generate --color "#f39c12" --method accessible --colors 4
+colormaestro "#f39c12" -t accessible -n 4
 ```
 
 ### Mood-Based Palettes
@@ -110,7 +119,7 @@ colormaestro generate --color "#f39c12" --method accessible --colors 4
 Create palettes that match a specific mood or feeling.
 
 ```bash
-colormaestro generate --mood professional --colors 5
+colormaestro --mood professional -n 5
 ```
 
 Available moods:
@@ -125,25 +134,27 @@ Available moods:
 Generate palettes specifically designed for user interfaces with proper contrast.
 
 ```bash
-colormaestro generate --color "#34495e" --method ui --colors 7 --dark-mode
+colormaestro "#34495e" -t ui -n 7 --dark
 ```
 
 ## Output Formats
+
+Select one or more output formats with `-o/--output` (comma-separated): `terminal` (default), `html`, `css`, `scss`, `tailwind`, `json`, `png`, `svg`.
 
 ### Terminal Output
 
 Display color palettes directly in your terminal with color previews.
 
 ```bash
-colormaestro generate --color "#3498db" --format terminal
+colormaestro "#3498db"
 ```
 
 ### CSS Variables
 
-Generate CSS custom properties (variables) for your palette.
+Print CSS custom properties (variables) for your palette.
 
 ```bash
-colormaestro generate --color "#3498db" --format css --output palette.css
+colormaestro "#3498db" -o css
 ```
 
 Example output:
@@ -168,26 +179,27 @@ Example output:
 
 ### SCSS Variables
 
-Generate SCSS variables and color maps for your palette.
+Print SCSS variables and color maps for your palette.
 
 ```bash
-colormaestro generate --color "#3498db" --format scss --output palette.scss
+colormaestro "#3498db" -o scss > palette.scss
 ```
 
 ### Tailwind Config
 
-Generate a Tailwind CSS configuration with your palette colors.
+Print a Tailwind CSS configuration with your palette colors.
 
 ```bash
-colormaestro generate --color "#3498db" --format tailwind --output tailwind-colors.js
+colormaestro "#3498db" -o tailwind > tailwind-colors.js
 ```
 
 ### HTML Preview
 
-Generate an HTML file that displays your palette.
+Generate an HTML file that displays your palette. Use `-o html` for the default filename (`palette.html`) or pass `--html PATH` to choose the location:
 
 ```bash
-colormaestro generate --color "#3498db" --format html --output palette.html
+colormaestro "#3498db" -o html
+colormaestro "#3498db" --html my-palette.html
 ```
 
 ### JSON Format
@@ -195,15 +207,16 @@ colormaestro generate --color "#3498db" --format html --output palette.html
 Export your palette as JSON for integration with other tools.
 
 ```bash
-colormaestro generate --color "#3498db" --format json --output palette.json
+colormaestro "#3498db" -o json > palette.json
 ```
 
 ### Image Export
 
-Export your palette as a PNG or SVG image.
+Export your palette as a PNG or SVG image. Use `-o png`/`-o svg` for default filenames (`palette.png`/`palette.svg`) or pass `--image PATH` to choose the location:
 
 ```bash
-colormaestro generate --color "#3498db" --format image --output palette.png
+colormaestro "#3498db" -o png
+colormaestro "#3498db" --image my-palette.png
 ```
 
 ## Advanced Usage
@@ -224,6 +237,12 @@ results = accessibility_utils.check_contrast(palette)
 
 # Display results
 accessibility_utils.display_results(results)
+```
+
+You can also check contrast directly from the CLI with `--accessibility`:
+
+```bash
+colormaestro "#3498db" --accessibility
 ```
 
 ### Combining Multiple Methods
@@ -250,43 +269,32 @@ with open("custom-palette.css", "w") as f:
 
 ## Complete CLI Reference
 
-```
-Usage: colormaestro [OPTIONS] COMMAND [ARGS]...
+Run `colormaestro --help` for the authoritative list of options:
 
-  ColorMaestro: A color palette generation tool.
+```
+Usage: colormaestro [OPTIONS] [INPUT]
+
+  Color Palette Maestro: Generate stunning color palettes instantly
 
 Options:
-  --version  Show the version and exit.
-  --help     Show this message and exit.
-
-Commands:
-  generate  Generate a color palette.
-  analyze   Analyze a color or palette.
-  convert   Convert colors between formats.
-```
-
-### Generate Command
-
-```
-Usage: colormaestro generate [OPTIONS]
-
-  Generate a color palette.
-
-Options:
-  --color TEXT             Base color in hex format (#RRGGBB).
+  -t, --type [ui|harmony|mono|accessible]
+                                  Palette type: ui, harmony, mono, accessible
+  --harmony [complementary|analogous|triadic|tetradic]
+                                  Harmony type: complementary, analogous,
+                                  triadic, tetradic
+  -n, --colors INTEGER            Number of colors to generate (default: 5)
+  -o, --output TEXT               Output format: terminal, html, css, scss,
+                                  tailwind, json, png, svg
+  --html TEXT                     Generate HTML preview file
+  --image TEXT                    Generate image file of palette
   --mood [professional|playful|serious|calm|energetic]
-                          Generate a palette based on mood.
-  --method [harmony|monochromatic|accessible|ui]
-                          Color generation method.
-  --harmony-type [complementary|analogous|triadic|tetradic|split-complementary]
-                          Harmony type when using harmony method.
-  --colors INTEGER         Number of colors in the palette.  [default: 5]
-  --dark-mode             Generate dark mode optimized palette.
-  --format [terminal|css|scss|html|json|tailwind|image]
-                          Output format.  [default: terminal]
-  --output TEXT           Output file path.
-  --show-demo             Show UI component examples.
-  --help                  Show this message and exit.
+                                  Color mood
+  --dark                          Generate dark mode variant
+  --light                         Generate light mode variant
+  --demo                          Show sample UI elements with palette
+  --accessibility                 Check WCAG contrast compliance
+  --copy                          Copy primary color to clipboard
+  --help                          Show this message and exit.
 ```
 
 ## License
