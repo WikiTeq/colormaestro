@@ -38,15 +38,15 @@ def generate(base_color, num_colors, dark_mode=False):
 
     # Generate darker and lighter variants
     if dark_mode:
-        # For dark mode, generate more light neutral colors
+        # For dark mode, generate dark neutral surface colors (low value)
         for i in range(num_colors - 3):
-            neutral_v = 0.3 + (i * 0.6 / (num_colors - 3))  # 0.3 to 0.9
+            neutral_v = 0.2 + (i * 0.3 / max(1, num_colors - 4))  # 0.2 to 0.5
             neutral = color_conversion.hsv_to_rgb((neutral_base_h, neutral_base_s, neutral_v))
             palette.append(neutral)
     else:
-        # For light mode, generate more dark neutral colors
+        # For light mode, generate light-to-dark neutral colors
         for i in range(num_colors - 3):
-            neutral_v = 0.9 - (i * 0.6 / (num_colors - 3))  # 0.9 to 0.3
+            neutral_v = 0.9 - (i * 0.6 / max(1, num_colors - 4))  # 0.9 to 0.3
             neutral = color_conversion.hsv_to_rgb((neutral_base_h, neutral_base_s, neutral_v))
             palette.append(neutral)
 
